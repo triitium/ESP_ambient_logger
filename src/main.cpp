@@ -81,7 +81,7 @@ private:
 
     float readTemperature() { return bme.readTemperature(); }
     float readHumidity()    { return bme.readHumidity(); }
-    float readPressure()    { return bme.readPressure(); }
+    float readPressure()    { return bme.readPressure() / 1.0F; }
 };
 
 class DataSender {
@@ -106,7 +106,7 @@ public:
         payload += "\"content\":{";
         payload += "\"temperature\":" + String(temperature, 2) + ",";
         payload += "\"humidity\":" + String(humidity, 2) + ",";
-        payload += "\"pressure\":" + String(pressure, 2);
+        payload += "\"pressure\":" + String(pressure, 0);
         payload += "}}";
 
         int code = http.POST(payload);
