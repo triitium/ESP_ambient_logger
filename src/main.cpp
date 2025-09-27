@@ -4,7 +4,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <array>
-#include "config.h"
+#include "main.h"
 
 // ---------------------------- Wi-Fi Manager ----------------------------
 class WiFiManager {
