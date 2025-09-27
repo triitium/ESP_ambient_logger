@@ -6,7 +6,6 @@
 #include <array>
 #include "main.h"
 
-// ---------------------------- Wi-Fi Manager ----------------------------
 class WiFiManager {
 public:
     WiFiManager(const char* ssid, const char* pass, unsigned long timeout)
@@ -20,6 +19,7 @@ public:
 
         lastAttempt = now;
         Serial.printf("Connecting to Wi-Fi: %s\n", ssid);
+        Serial.printf("%s\n", pass);
         WiFi.begin(ssid, pass);
 
         unsigned long start = millis();
@@ -43,7 +43,6 @@ private:
     unsigned long lastAttempt;
 };
 
-// ---------------------------- BME280 Sensor ----------------------------
 class BME280Sensor {
 public:
     BME280Sensor(uint8_t addr = 0x76) : addr(addr), index(0), filled(false) {}
@@ -100,7 +99,6 @@ private:
     }
 };
 
-// ---------------------------- Data Sender ----------------------------
 class DataSender {
 public:
     DataSender(const char* serverUrl, const char* endpoint, const char* apiKey)
@@ -141,14 +139,12 @@ private:
     const char* apiKey;
 };
 
-// ---------------------------- Globals ----------------------------
 WiFiManager wifiManager(WIFI_SSID, WIFI_PASS, WIFI_TIMEOUT_MS);
 BME280Sensor sensor;
 DataSender sender(SERVER_URL, ENDPOINT, API_KEY);
 
 unsigned long lastSend = 0;
 
-// ---------------------------- Setup ----------------------------
 void setup() {
     Serial.begin(115200);
     Wire.begin();
@@ -161,13 +157,12 @@ void setup() {
     wifiManager.update();
 }
 
-// ---------------------------- Loop ----------------------------
 void loop() {
     wifiManager.update();
 
     if (WiFi.status() != WL_CONNECTED) return;
 
-    sensor.update(); // store a new sample
+    sensor.update();
 
     unsigned long now = millis();
     if (now - lastSend >= INTERVAL_MS) {
