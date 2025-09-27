@@ -45,7 +45,7 @@ private:
 
 class BME280Sensor {
 public:
-    BME280Sensor(uint8_t addr = 0x76) : addr(addr), index(0), filled(false) {}
+    BME280Sensor(uint8_t addr = 0x76) : addr(addr) {}
 
     bool begin() {
         if (!bme.begin(addr)) {
@@ -55,47 +55,34 @@ public:
         return true;
     }
 
-    void update() {
-        float t = bme.readTemperature();
-        float h = bme.readHumidity();
-        float p = bme.readPressure() / 100.0F;
-
-        if (isnan(t) || isnan(h) || isnan(p)) {
-            Serial.println("Sensor read failed, skipping sample...");
-            return;
-        }
-
-        tempBuffer[index] = t;
-        humBuffer[index]  = h;
-        presBuffer[index] = p;
-
-        index = (index + 1) % SAMPLE_SIZE;
-        if (index == 0) filled = true;
-    }
-
-    float getAverageTemperature() { return average(tempBuffer); }
-    float getAverageHumidity()    { return average(humBuffer); }
-    float getAveragePressure()    { return average(presBuffer); }
+    float getAverageTemperature() { return measureAverage(&BME280Sensor::readTemperature); }
+    float getAverageHumidity()    { return measureAverage(&BME280Sensor::readHumidity); }
+    float getAveragePressure()    { return measureAverage(&BME280Sensor::readPressure); }
 
 private:
     Adafruit_BME280 bme;
     uint8_t addr;
 
-    std::array<float, SAMPLE_SIZE> tempBuffer{};
-    std::array<float, SAMPLE_SIZE> humBuffer{};
-    std::array<float, SAMPLE_SIZE> presBuffer{};
-
-    size_t index;
-    bool filled;
-
-    float average(const std::array<float, SAMPLE_SIZE>& buffer) {
-        size_t count = filled ? SAMPLE_SIZE : index;
-        if (count == 0) return NAN;
-
+    float measureAverage(float (BME280Sensor::*readFunc)()) {
         float sum = 0.0f;
-        for (size_t i = 0; i < count; i++) sum += buffer[i];
-        return sum / count;
+        int validCount = 0;
+
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
+            float val = (this->*readFunc)();
+            if (!isnan(val)) {
+                sum += val;
+                validCount++;
+            }
+            delay(50);
+        }
+
+        if (validCount == 0) return NAN;
+        return sum / validCount;
     }
+
+    float readTemperature() { return bme.readTemperature(); }
+    float readHumidity()    { return bme.readHumidity(); }
+    float readPressure()    { return bme.readPressure(); }
 };
 
 class DataSender {
@@ -160,8 +147,6 @@ void loop() {
     wifiManager.update();
 
     if (WiFi.status() != WL_CONNECTED) return;
-
-    sensor.update();
 
     unsigned long now = millis();
     if (now - lastSend >= INTERVAL_MS) {
