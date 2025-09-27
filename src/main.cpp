@@ -19,7 +19,6 @@ public:
 
         lastAttempt = now;
         Serial.printf("Connecting to Wi-Fi: %s\n", ssid);
-        Serial.printf("%s\n", pass);
         WiFi.begin(ssid, pass);
 
         unsigned long start = millis();
@@ -129,7 +128,7 @@ WiFiManager wifiManager(WIFI_SSID, WIFI_PASS, WIFI_TIMEOUT_MS);
 BME280Sensor sensor;
 DataSender sender(SERVER_URL, ENDPOINT, API_KEY);
 
-unsigned long lastSend = 0;
+unsigned long lastSend = INTERVAL_MS;
 
 void setup() {
     Serial.begin(115200);
