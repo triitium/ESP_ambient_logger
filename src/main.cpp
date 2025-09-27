@@ -60,7 +60,6 @@ public:
         float h = bme.readHumidity();
         float p = bme.readPressure() / 100.0F;
 
-        // Handle invalid readings
         if (isnan(t) || isnan(h) || isnan(p)) {
             Serial.println("Sensor read failed, skipping sample...");
             return;
