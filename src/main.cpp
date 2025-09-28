@@ -97,7 +97,6 @@ public:
         }
 
         String url = String(serverUrl) + endpoint;
-        Serial.println(url);
         http.begin(client, url);
         http.addHeader("Content-Type", "application/json");
 
@@ -108,8 +107,6 @@ public:
         payload += "\"humidity\":" + String(humidity, 2) + ",";
         payload += "\"pressure\":" + String(pressure, 0);
         payload += "}}";
-
-        Serial.println(payload);
 
         int code = http.POST(payload);
         if (code > 0) {
