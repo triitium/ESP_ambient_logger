@@ -73,6 +73,7 @@ private:
                 validCount++;
             }
             delay(50);
+            yield();
         }
 
         if (validCount == 0) return NAN;
@@ -95,9 +96,8 @@ public:
             return;
         }
 
-        HTTPClient http;
-        WiFiClient client;
         String url = String(serverUrl) + endpoint;
+        Serial.println(url);
         http.begin(client, url);
         http.addHeader("Content-Type", "application/json");
 
@@ -109,6 +109,8 @@ public:
         payload += "\"pressure\":" + String(pressure, 0);
         payload += "}}";
 
+        Serial.println(payload);
+
         int code = http.POST(payload);
         if (code > 0) {
             Serial.printf("Data sent! HTTP code: %d\n", code);
@@ -119,6 +121,8 @@ public:
     }
 
 private:
+    HTTPClient http;
+    WiFiClient client;
     const char* serverUrl;
     const char* endpoint;
     const char* apiKey;
